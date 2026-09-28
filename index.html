@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="es" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BURGER & DOGS | Sabor Explosivo 3D</title>
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- GSAP y ScrollTrigger para Animaciones -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  
+  <!-- Feather Icons -->
+  <script src="https://unpkg.com/feather-icons"></script>
+
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800;900&display=swap');
+    
+    body {
+      font-family: 'Poppins', sans-serif;
+      background-color: #FFFDF7;
+      color: #2D1810;
+      overflow-x: hidden;
+    }
+
+    /* Perspectiva y Escena 3D */
+    .perspective-1000 {
+      perspective: 1000px;
+    }
+
+    .preserve-3d {
+      transform-style: preserve-3d;
+    }
+
+    /* Sombras y Tarjetas Alegres */
+    .bright-card {
+      background: rgba(255, 255, 255, 0.9);
+      backdrop-filter: blur(12px);
+      border: 2px solid #FFE8D6;
+      box-shadow: 0 20px 40px -15px rgba(234, 88, 12, 0.15);
+    }
+
+    .burger-shadow {
+      filter: drop-shadow(0 25px 20px rgba(180, 83, 9, 0.3));
+    }
+
+    /* Animación de Flotación 3D Suave */
+    @keyframes float3D {
+      0%, 100% { transform: translateY(0px) rotate(0deg); }
+      50% { transform: translateY(-18px) rotate(3deg); }
+    }
+
+    .floating-element {
+      animation: float3D 4s ease-in-out infinite;
+    }
+  </style>
+</head>
+<body class="antialiased selection:bg-amber-400 selection:text-red-900">
+
+  <!-- BARRA DE NAVEGACIÓN -->
+  <nav class="fixed top-0 left-0 w-full z-50 bg-white/90 backdrop-blur-md border-b border-orange-100 px-6 py-4 flex justify-between items-center shadow-sm">
+    <div class="flex items-center gap-2">
+      <span class="text-3xl">🍔</span>
+      <span class="text-2xl font-black tracking-tight text-red-600">BURGER<span class="text-amber-500">&DOGS</span></span>
+    </div>
+
+    <div class="hidden md:flex space-x-8 text-base font-bold text-gray-700">
+      <a href="#hero" class="hover:text-red-600 transition">Inicio</a>
+      <a href="#menu" class="hover:text-red-600 transition">Menú Explosivo</a>
+      <a href="#promos" class="hover:text-red-600 transition">Promociones</a>
+    </div>
+
+    <button onclick="toggleCart()" class="relative bg-amber-500 hover:bg-amber-600 text-white p-3 rounded-2xl shadow-lg shadow-amber-500/30 transition transform hover:scale-105 flex items-center gap-2">
+      <i data-feather="shopping-bag" class="w-5 h-5"></i>
+      <span class="font-bold text-sm hidden sm:inline">Tu Pedido</span>
+      <span id="cart-count" class="bg-red-600 text-white text-xs font-black rounded-full w-6 h-6 flex items-center justify-center border-2 border-white">0</span>
+    </button>
+  </nav>
+
+  <!-- SECCIÓN HERO INTERACTIVA 3D (MUSE TILT & POP-OUT JUMP) -->
+  <section id="hero" class="min-h-screen relative flex items-center justify-center pt-28 pb-16 bg-gradient-to-b from-amber-50 via-orange-50/50 to-white overflow-hidden">
+    
+    <!-- Círculos Decorativos Alegres de Fondo -->
+    <div class="absolute top-20 left-10 w-72 h-72 bg-amber-300/30 rounded-full blur-3xl pointer-events-none"></div>
+    <div class="absolute bottom-10 right-10 w-96 h-96 bg-red-400/20 rounded-full blur-3xl pointer-events-none"></div>
+
+    <div class="container mx-auto px-6 grid lg:grid-cols-2 gap-12 items-center">
+      
+      <!-- Texto Principal -->
+      <div class="z-10 text-center lg:text-left">
+        <span class="bg-red-100 text-red-600 text-sm font-extrabold px-4 py-2 rounded-full border border-red-200 uppercase tracking-wider inline-block mb-4">
+          🔥 ¡100% Carne a la Parrilla & Sabor Real!
+        </span>
+        <h1 class="text-5xl lg:text-7xl font-black text-gray-900 leading-none">
+          Sabor que <br>
+          <span class="text-transparent bg-clip-text bg-gradient-to-r from-red-600 via-orange-500 to-amber-500">Salta a tu Boca</span>
+        </h1>
+        <p class="text-gray-600 mt-6 text-lg max-w-lg mx-auto lg:mx-0 font-medium">
+          Mueve el cursor sobre las imágenes para sentir la perspectiva 3D interactiva o haz clic en el botón para ver cómo salta el ingrediente directo a la mesa.
+        </p>
+        
+        <div class="mt-8 flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
+          <button onclick="animatePopOut()" class="bg-gradient-to-r from-red-600 to-orange-500 hover:from-red-700 hover:to-orange-600 text-white px-8 py-4 rounded-2xl font-black shadow-xl shadow-red-500/25 hover:scale-105 transition transform text-center flex items-center justify-center gap-3 text-lg">
+            <i data-feather="zap"></i> ¡Probar Salto 3D!
+          </button>
+          <a href="#menu" class="bg-white text-gray-800 border-2 border-orange-200 px-8 py-4 rounded-2xl font-bold hover:bg-orange-50 transition text-center shadow-sm">
+            Explorar Menú
+          </a>
+        </div>
+      </div>
+
+      <!-- ESCENARIO 3D INTERACTIVO (TILT CON MOUSE + ZAPATO/BURGER SALTO) -->
+      <div id="stage-3d" class="relative flex justify-center items-center h-[500px] perspective-1000 cursor-grab">
+        
+        <div id="tilt-box" class="relative w-full h-full flex justify-center items-center preserve-3d transition-transform duration-150 ease-out">
+
+          <!-- Marco Izquierdo (Mesa de Hamburguesas) -->
+          <div class="absolute w-64 h-[400px] bg-white rounded-3xl p-4 border-4 border-amber-300 shadow-2xl transform -rotate-12 -translate-x-24 lg:-translate-x-32 flex flex-col justify-between preserve-3d">
+            <div class="bg-amber-100 text-amber-800 text-xs font-black px-3 py-1 rounded-full w-max">
+              Especialidad
+            </div>
+            <img src="foto2.jpg" alt="Hamburguesa Parrilla" class="w-full h-44 object-cover rounded-2xl shadow-md">
+            <div class="text-center">
+              <h4 class="font-extrabold text-gray-900">Burger Flame 3D</h4>
+              <p class="text-red-600 font-black text-lg">$9.99 USD</p>
+            </div>
+          </div>
+
+          <!-- HAMBURGUESA / INGREDIENTE PRINCIPAL FLOTANTE 3D (FOTO 1) -->
+          <img id="pop-burger" src="foto1.jpg" 
+               alt="Hamburguesa Explotada 3D" 
+               class="absolute w-72 lg:w-80 z-40 burger-shadow preserve-3d floating-element rounded-3xl border-4 border-white transform hover:scale-110 transition duration-300 cursor-pointer">
+
+          <!-- Marco Derecho (Mesa Hot Dogs) -->
+          <div class="absolute w-64 h-[400px] bg-white rounded-3xl p-4 border-4 border-orange-300 shadow-2xl transform rotate-12 translate-x-24 lg:translate-x-32 flex flex-col justify-between preserve-3d">
+            <div class="bg-orange-100 text-orange-800 text-xs font-black px-3 py-1 rounded-full w-max">
+              Hot Dog Deluxe
+            </div>
+            <img src="dog1.jpg" alt="Hot Dog Especial" class="w-full h-44 object-cover rounded-2xl shadow-md">
+            <div class="text-center">
+              <h4 class="font-extrabold text-gray-900">Super Perro Caliente</h4>
+              <p class="text-red-600 font-black text-lg">$7.50 USD</p>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+  </section>
+
+  <!-- SECCIÓN MENÚ CON PESTAÑAS (HAMBURGUESAS / HOT DOGS) -->
+  <section id="menu" class="py-20 container mx-auto px-6">
+    
+    <div class="text-center max-w-2xl mx-auto mb-12">
+      <h2 class="text-4xl lg:text-5xl font-black text-gray-900">Nuestro Menú Explosivo</h2>
+      <p class="text-gray-600 font-medium mt-2">Selecciona tus favoritos y añádelos al carrito para pedir por WhatsApp de inmediato.</p>
+      
+      <!-- Botones Filtro de Categorías -->
+      <div class="flex justify-center gap-4 mt-8">
+        <button onclick="filterCategory('all')" class="cat-btn bg-red-600 text-white font-bold px-6 py-3 rounded-xl shadow-md transition">Todos</button>
+        <button onclick="filterCategory('burgers')" class="cat-btn bg-white text-gray-700 hover:bg-orange-100 font-bold px-6 py-3 rounded-xl border border-orange-200 transition">🍔 Hamburguesas</button>
+        <button onclick="filterCategory('dogs')" class="cat-btn bg-white text-gray-700 hover:bg-orange-100 font-bold px-6 py-3 rounded-xl border border-orange-200 transition">🌭 Hot Dogs</button>
+      </div>
+    </div>
+
+    <!-- REJILLA DE PRODUCTOS (USA TUS IMÁGENES EXACTAS) -->
+    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+      
+      <!-- Producto 1: foto2.jpg -->
+      <div class="product-card burgers bright-card rounded-3xl p-5 hover:scale-[1.02] transition duration-300">
+        <div class="relative overflow-hidden rounded-2xl h-56 bg-amber-50">
+          <img src="foto2.jpg" alt="Burger Fuego" class="w-full h-full object-cover transform hover:scale-110 transition duration-500">
+          <span class="absolute top-3 right-3 bg-red-600 text-white text-xs font-black px-3 py-1 rounded-full shadow">Parrilla</span>
+        </div>
+        <div class="mt-5">
+          <h3 class="text-xl font-black text-gray-900">Burger Fuego & Queso</h3>
+          <p class="text-gray-500 text-sm mt-1">Carne a la parrilla, queso cheddar derretido y salsa especial.</p>
+          <div class="flex justify-between items-center mt-6">
+            <span class="text-2xl font-black text-red-600">$9.99</span>
+            <button onclick="addToCart('Burger Fuego & Queso', 9.99)" class="bg-amber-500 hover:bg-amber-600 text-white p-3 rounded-xl shadow-lg shadow-amber-500/30 transition">
+              <i data-feather="plus"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Producto 2: foto3.jpg -->
+      <div class="product-card burgers bright-card rounded-3xl p-5 hover:scale-[1.02] transition duration-300">
+        <div class="relative overflow-hidden rounded-2xl h-56 bg-amber-50">
+          <img src="foto3.jpg" alt="Burger BBQ Flame" class="w-full h-full object-cover transform hover:scale-110 transition duration-500">
+          <span class="absolute top-3 right-3 bg-amber-500 text-white text-xs font-black px-3 py-1 rounded-full shadow">Popular</span>
+        </div>
+        <div class="mt-5">
+          <h3 class="text-xl font-black text-gray-900">BBQ Flame Extreme</h3>
+          <p class="text-gray-500 text-sm mt-1">Carne ahumada, cebolla caramelizada, doble queso y salsa BBQ.</p>
+          <div class="flex justify-between items-center mt-6">
+            <span class="text-2xl font-black text-red-600">$10.50</span>
+            <button onclick="addToCart('BBQ Flame Extreme', 10.50)" class="bg-amber-500 hover:bg-amber-600 text-white p-3 rounded-xl shadow-lg shadow-amber-500/30 transition">
+              <i data-feather="plus"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Producto 3: foto4.jpg -->
+      <div class="product-card burgers bright-card rounded-3xl p-5 hover:scale-[1.02] transition duration-300">
+        <div class="relative overflow-hidden rounded-2xl h-56 bg-amber-50">
+          <img src="foto4.jpg" alt="Burger Doble Tocineta" class="w-full h-full object-cover transform hover:scale-110 transition duration-500">
+        </div>
+        <div class="mt-5">
+          <h3 class="text-xl font-black text-gray-900">Doble Carne & Tocineta</h3>
+          <p class="text-gray-500 text-sm mt-1">Doble medallón de carne, tocineta crocante y baño de queso cheddar.</p>
+          <div class="flex justify-between items-center mt-6">
+            <span class="text-2xl font-black text-red-600">$12.00</span>
+            <button onclick="addToCart('Doble Carne & Tocineta', 12.00)" class="bg-amber-500 hover:bg-amber-600 text-white p-3 rounded-xl shadow-lg shadow-amber-500/30 transition">
+              <i data-feather="plus"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Producto 4: foto5.jpg -->
+      <div class="product-card burgers bright-card rounded-3xl p-5 hover:scale-[1.02] transition duration-300">
+        <div class="relative overflow-hidden rounded-2xl h-56 bg-amber-50">
+          <img src="foto5.jpg" alt="Burger Triple Tower" class="w-full h-full object-cover transform hover:scale-110 transition duration-500">
+        </div>
+        <div class="mt-5">
+          <h3 class="text-xl font-black text-gray-900">Triple Tower Clásica</h3>
+          <p class="text-gray-500 text-sm mt-1">Torre de 3 carnes, lechuga fresca, tomate y pepinillos caseros.</p>
+          <div class="flex justify-between items-center mt-6">
+            <span class="text-2xl font-black text-red-600">$13.50</span>
+            <button onclick="addToCart('Triple Tower Clásica', 13.50)" class="bg-amber-500 hover:bg-amber-600 text-white p-3 rounded-xl shadow-lg shadow-amber-500/30 transition">
+              <i data-feather="plus"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Producto 5: foto6.jpg -->
+      <div class="product-card burgers bright-card rounded-3xl p-5 hover:scale-[1.02] transition duration-300">
+        <div class="relative overflow-hidden rounded-2xl h-56 bg-amber-50">
+          <img src="foto6.jpg" alt="Burger Gourmet Capas" class="w-full h-full object-cover transform hover:scale-110 transition duration-500">
+        </div>
+        <div class="mt-5">
+          <h3 class="text-xl font-black text-gray-900">Burger Gourmet Master</h3>
+          <p class="text-gray-500 text-sm mt-1">Pan brioche tostado, aros de cebolla, queso emmental y salsa especial.</p>
+          <div class="flex justify-between items-center mt-6">
+            <span class="text-2xl font-black text-red-600">$11.00</span>
+            <button onclick="addToCart('Burger Gourmet Master', 11.00)" class="bg-amber-500 hover:bg-amber-600 text-white p-3 rounded-xl shadow-lg shadow-amber-500/30 transition">
+              <i data-feather="plus"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Producto 6: dog1.jpg -->
+      <div class="product-card dogs bright-card rounded-3xl p-5 hover:scale-[1.02] transition duration-300">
+        <div class="relative overflow-hidden rounded-2xl h-56 bg-amber-50">
+          <img src="dog1.jpg" alt="Hot Dog Explosivo" class="w-full h-full object-cover transform hover:scale-110 transition duration-500">
+          <span class="absolute top-3 right-3 bg-red-600 text-white text-xs font-black px-3 py-1 rounded-full shadow">Especial</span>
+        </div>
+        <div class="mt-5">
+          <h3 class="text-xl font-black text-gray-900">Hot Dog Explosión Mostaza</h3>
+          <p class="text-gray-500 text-sm mt-1">Salchicha alemana gigante, aderezo de mostaza miel y vegetales picados.</p>
+          <div class="flex justify-between items-center mt-6">
+            <span class="text-2xl font-black text-red-600">$7.50</span>
+            <button onclick="addToCart('Hot Dog Explosión Mostaza', 7.50)" class="bg-amber-500 hover:bg-amber-600 text-white p-3 rounded-xl shadow-lg shadow-amber-500/30 transition">
+              <i data-feather="plus"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Producto 7: dog2.jpg -->
+      <div class="product-card dogs bright-card rounded-3xl p-5 hover:scale-[1.02] transition duration-300">
+        <div class="relative overflow-hidden rounded-2xl h-56 bg-amber-50">
+          <img src="dog2.jpg" alt="Hot Dog Gourmet" class="w-full h-full object-cover transform hover:scale-110 transition duration-500">
+        </div>
+        <div class="mt-5">
+          <h3 class="text-xl font-black text-gray-900">Super Dog Tex-Mex</h3>
+          <p class="text-gray-500 text-sm mt-1">Con pimientos salteados, salsa de ajo casera y lluvia de cebollín.</p>
+          <div class="flex justify-between items-center mt-6">
+            <span class="text-2xl font-black text-red-600">$8.20</span>
+            <button onclick="addToCart('Super Dog Tex-Mex', 8.20)" class="bg-amber-500 hover:bg-amber-600 text-white p-3 rounded-xl shadow-lg shadow-amber-500/30 transition">
+              <i data-feather="plus"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- CARRITO LATERAL DE PEDIDOS -->
+  <div id="cart-drawer" class="fixed top-0 right-0 h-full w-80 bg-white z-50 transform translate-x-full transition-transform duration-300 p-6 flex flex-col justify-between shadow-2xl border-l border-orange-100">
+    <div>
+      <div class="flex justify-between items-center pb-4 border-b border-gray-100">
+        <h3 class="font-black text-xl text-gray-900">Tu Pedido 🛍️</h3>
+        <button onclick="toggleCart()" class="text-gray-400 hover:text-gray-700">
+          <i data-feather="x"></i>
+        </button>
+      </div>
+      <div id="cart-items" class="mt-4 space-y-4 max-h-[60vh] overflow-y-auto">
+        <p class="text-gray-400 text-sm text-center py-8">Tu carrito está vacío.</p>
+      </div>
+    </div>
+
+    <div class="border-t border-gray-100 pt-4">
+      <div class="flex justify-between font-black text-xl mb-4 text-gray-900">
+        <span>Total:</span>
+        <span id="cart-total" class="text-red-600">$0.00</span>
+      </div>
+      <button onclick="checkoutWhatsApp()" class="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-black py-4 rounded-2xl flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/30 transition text-lg">
+        <i data-feather="message-circle"></i> Pedir por WhatsApp
+      </button>
+    </div>
+  </div>
+
+  <footer class="bg-amber-50 border-t border-orange-100 py-8 text-center text-sm font-bold text-gray-500">
+    <p>© 2026 BURGER & DOGS. Todos los derechos reservados.</p>
+  </footer>
+
+  <script>
+    feather.replace();
+
+    // 1. EFECTO INCLINACIÓN 3D CON EL CURSOR (MOUSE TILT)
+    const stage = document.getElementById('stage-3d');
+    const tiltBox = document.getElementById('tilt-box');
+
+    stage.addEventListener('mousemove', (e) => {
+      const rect = stage.getBoundingClientRect();
+      const x = e.clientX - rect.left - rect.width / 2;
+      const y = e.clientY - rect.top - rect.height / 2;
+
+      const rotateX = (-y / rect.height) * 25;
+      const rotateY = (x / rect.width) * 25;
+
+      gsap.to(tiltBox, {
+        rotateX: rotateX,
+        rotateY: rotateY,
+        duration: 0.4,
+        ease: "power2.out"
+      });
+    });
+
+    stage.addEventListener('mouseleave', () => {
+      gsap.to(tiltBox, {
+        rotateX: 0,
+        rotateY: 0,
+        duration: 0.8,
+        ease: "power2.out"
+      });
+    });
+
+    // 2. EFECTO DE SALTO POP-OUT 3D
+    let isShifted = false;
+    function animatePopOut() {
+      const burger = document.getElementById('pop-burger');
+      const targetX = isShifted ? 0 : 120;
+
+      gsap.timeline()
+        .to(burger, {
+          scale: 1.4,
+          rotate: isShifted ? -15 : 15,
+          duration: 0.4,
+          ease: "power2.out"
+        })
+        .to(burger, {
+          x: targetX,
+          duration: 0.5,
+          ease: "power1.inOut"
+        })
+        .to(burger, {
+          scale: 1,
+          rotate: 0,
+          duration: 0.4,
+          ease: "bounce.out"
+        });
+
+      isShifted = !isShifted;
+    }
+
+    // 3. CARRITO DE COMPRAS INTEGRADO
+    let cart = [];
+
+    function toggleCart() {
+      document.getElementById('cart-drawer').classList.toggle('translate-x-full');
+    }
+
+    function addToCart(title, price) {
+      cart.push({ title, price });
+      updateCart();
+      toggleCart();
+    }
+
+    function updateCart() {
+      const container = document.getElementById('cart-items');
+      const count = document.getElementById('cart-count');
+      const total = document.getElementById('cart-total');
+
+      count.innerText = cart.length;
+
+      if (cart.length === 0) {
+        container.innerHTML = '<p class="text-gray-400 text-sm text-center py-8">Tu carrito está vacío.</p>';
+        total.innerText = '$0.00';
+        return;
+      }
+
+      let sum = 0;
+      container.innerHTML = '';
+      cart.forEach((item, index) => {
+        sum += item.price;
+        container.innerHTML += `
+          <div class="flex justify-between items-center bg-orange-50/50 p-3 rounded-2xl border border-orange-100">
+            <div>
+              <p class="text-sm font-bold text-gray-900">${item.title}</p>
+              <p class="text-xs text-red-600 font-black">$${item.price.toFixed(2)}</p>
+            </div>
+            <button onclick="removeFromCart(${index})" class="text-red-500 hover:text-red-700">
+              <i data-feather="trash-2" class="w-4 h-4"></i>
+            </button>
+          </div>
+        `;
+      });
+      feather.replace();
+      total.innerText = `$${sum.toFixed(2)}`;
+    }
+
+    function removeFromCart(index) {
+      cart.splice(index, 1);
+      updateCart();
+    }
+
+    function checkoutWhatsApp() {
+      if (cart.length === 0) return alert('Agrega al menos un producto al carrito.');
+      let msg = '¡Hola! Quisiera realizar el siguiente pedido:\n\n';
+      cart.forEach(i => msg += `• ${i.title} ($${i.price.toFixed(2)})\n`);
+      msg += `\nTotal a Pagar: ${document.getElementById('cart-total').innerText}`;
+      window.open(`https://wa.me/5491112345678?text=${encodeURIComponent(msg)}`, '_blank');
+    }
+
+    // 4. FILTRO DE CATEGORÍAS
+    function filterCategory(cat) {
+      const cards = document.querySelectorAll('.product-card');
+      cards.forEach(card => {
+        if (cat === 'all') {
+          card.style.display = 'block';
+        } else {
+          card.style.display = card.classList.contains(cat) ? 'block' : 'none';
+        }
+      });
+    }
+  </script>
+</body>
+</html>
